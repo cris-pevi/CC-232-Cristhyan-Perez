@@ -78,3 +78,5 @@ Entonces podemos decir que la Semana6, como ya es sabido, aquí podemos comproba
 
 8. ¿Qué evidencia inicial obtuviste al ejecutar las pruebas sin modificar nada?.
 
+A partir de la Semana6 correr lo siguiente:
+cmake --test-dir build-debug -R semana6 --output-on-failure
