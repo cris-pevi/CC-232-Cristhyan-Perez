@@ -80,3 +80,55 @@ Entonces podemos decir que la Semana6, como ya es sabido, aquí podemos comproba
 
 A partir de la Semana6 correr lo siguiente:
 cmake --test-dir build-debug -R semana6 --output-on-failure
+
+
+#### Bloque 2 - Modificación de utilidades de heap completo
+
+`PQ_ComplHeap_macro.h` ya contiene seis funciones `constexpr` que encapsulan la aritmética de índices del heap binario completo:
+
+* `pqParent(i)` -> Índice del padre de `i`
+* `pqLeftChild(i)` -> Índice del hijo izquierdo de `i`
+* `pqRightChild(i)` -> Índice del hijo derecho de `i`
+* `pqInHeap(i, n)` -> ¿El índice `i` está dentro del heap?
+* `pqHasParent(i)` -> ¿El nodo `i` tiene padre?
+* `pqLastInternal(n)` -> Último nodo interno del heap
+
+Lo que falta es poder preguntar directamente si un nodo concreto tiene hijo izquierdo, si tiene hijo derecho, si es hoja, o es interno, sin exponer la aritmética en cada punto de uso.
+
+1. ¿Por qué conviene expresar `parent`, `left`, `right` y pruebas de frontera como funciones pequeñas?
+
+Una de las razónes es por el nombre por contrato por ejemplo en `pqHasLeftChild(i, n)` dice directamente "qué" se pregunta. Mientras que, `pqInHeap(pqLeftChild(i), n)` dice *cómo* se computa.
+
+Otra de las razones es por tener un punto único de definición dado que si la representación cambiara, por ejemplo a un heap 1-indexado donde `pqLeftChild(i) = 2*i` solo se modifican `pqLeftChild` y `pqRightChild`.
+Aquí las funciones de más alto nivel como `pqHasLeftChild` y `pqIsLeaf` se actualizan automáticamente por herencia.
+
+Además, otra de las razones es que los Test son independientes ya que se puede verifivar en una prueba unitaria que `pqIsLeaf(3, 4)` devuelve `true` (nodo 3 en heap de 4 elementos, sin hijos) antes de integrar `percolateDown`.
+
+2. ¿Qué ventaja tiene `constexpr` frente a macros?
+
+
+3. ¿Qué caso borde aparece cuando el nodo tiene solo hijo izquierdo?
+
+El caso borde ocurre cuando el heap tiene un número par de elementos. El último elemento del arreglo es el hijo izquierdo del último nodo interno, y ese nodo interno no tiene hijo derecho.
+
+Por ejemplo con n = 6, con índices del o al 5:
+
+```bash
+        0
+      |   |
+     1     2
+    | |   |
+    3 4   5
+```
+
+El nodo en índice 2 tiene hijo izquierdo (índice 5) pero no hijo derecho.
+
+Si `percolateDown` llega al nodo 2, el bucle continúa porque `pqHasLeftChild(2, 6)` es verdadero (2*2+1 = 5 < 6). Dentro del bucle, `c` se inicializa en 5. Luego se evalúa `pqHasRightChild(2, 6)`: 2*2+2 = 6, y 6 < 6 es falso, así que la rama del `if` no se toma y `c` permanece en 5.
+
+El peligro que el código debe evitar es intentar acceder a a[6] como si el hijo derecho existiera. En la versión original, r = pqRightChild(i) se calcula siempre, pero `pqInHeap(r, n)` lo descarta antes del acceso a a[r]. En la versión modificada, `pqHasRightChild(i, n)` encapsula exactamente esa comprobación, haciendo más difícil equivocarse si se reescribe la lógica internamente.
+
+4. ¿Qué condición identifica una hoja en la representación implícita?
+
+
+5. ¿Qué cambió en `percolateDown` después de usar las funciones auxiliares?
+
