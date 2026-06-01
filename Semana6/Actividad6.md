@@ -152,3 +152,4 @@ El peligro que el código debe evitar es intentar acceder a a[6] como si el hijo
 Bueno, `delMax` hace dos cosas. Primero, intercambiar el primer y último elemento y reducir el tamaño, esto es O(1). Y, segundo, llamar `complHeapPercolateDown` desde la raíz.
 
 Aqui, `percolateDown` sigue un camino desde la raíz hacia abajo. En cada iteración del bucle, i va a pasar a uno de sus hijos, es decir, baja un nivel. Un heap binario completo de n elementos tiene altura `h = ⌊log n⌋`. Por tanto el bucle ejecuta a lo sumo h iteraciones. Cada iteración realiza O(1) trabajo (dos comparaciones, a lo sumo un swap). Por lo tanto, el costo total es O(log n).
+
