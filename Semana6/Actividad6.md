@@ -132,3 +132,23 @@ El peligro que el código debe evitar es intentar acceder a a[6] como si el hijo
 
 5. ¿Qué cambió en `percolateDown` después de usar las funciones auxiliares?
 
+
+## Bloque 4 - Modificación de `percolateDown`: elección del hijo dominante
+
+1. ¿Por qué después de `delMax` se mueve el último elemento a la raíz?
+
+
+2. ¿Por qué la reparación baja y no sube?
+
+
+3. ¿Cómo se decide entre hijo izquierdo e hijo derecho?
+
+
+4. ¿Qué pasa si el nodo actual tiene un solo hijo?
+
+
+5. ¿Por qué `delMax` tiene costo `O(log n)`?.
+
+Bueno, `delMax` hace dos cosas. Primero, intercambiar el primer y último elemento y reducir el tamaño, esto es O(1). Y, segundo, llamar `complHeapPercolateDown` desde la raíz.
+
+Aqui, `percolateDown` sigue un camino desde la raíz hacia abajo. En cada iteración del bucle, i va a pasar a uno de sus hijos, es decir, baja un nivel. Un heap binario completo de n elementos tiene altura `h = ⌊log n⌋`. Por tanto el bucle ejecuta a lo sumo h iteraciones. Cada iteración realiza O(1) trabajo (dos comparaciones, a lo sumo un swap). Por lo tanto, el costo total es O(log n).
