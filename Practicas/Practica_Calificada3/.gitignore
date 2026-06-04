@@ -1,0 +1,50 @@
+# Carpetas de compilacion (build directories)
+build/
+cmake-build-*/
+Debug/
+Release/
+x64/
+bin/
+out/
+
+# Archivos generados por CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+*.cmake.tmp
+
+# Ejecutables
+*.out
+*.exe
+*.app
+
+# Archivos objeto y bibliotecas compiladas
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.dylib
+*.lib
+
+# Python auxiliar
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Editores e IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Logs y temporales
+*.log
+*.tmp
+*~
