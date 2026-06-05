@@ -11,3 +11,17 @@ void PointsIngenua::remove(int x, int y){
             return;
         }
     }
+}
+
+Point PointsIngenua::find(int x, int y){
+    Point best = Point{-1, -1};
+
+    for (auto it = pointsAvailable.begin(); it != pointsAvailable.end(); it++){
+        if (it->x > x && it->y > y){
+            if (best.x == -1 || it->x < best.x || (it->x == best.x && it->y < best.y)){
+                best = Point{it->x, it->y};
+            }
+        } 
+    }
+    return best;
+}
