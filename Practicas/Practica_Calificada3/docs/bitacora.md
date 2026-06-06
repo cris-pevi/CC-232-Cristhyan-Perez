@@ -25,3 +25,44 @@ Las órdenes son de tres tipos:
 
 Las restricciones del problema son hasta 2·10⁵ operaciones en total y coordenadas hasta 10⁹, lo cual descarta inmediatamente cualquier solución cuadrática, aunque usaré esta idea para proponer la solución ingenua.
 
+### Día 3: `05/06/2026`
+
+Este día tuvo como objetivo la implementación de la solución ingenua y para ello se realizaron las siguientes actividades:
+
+- Construí la cabecera `include/solution.h` definiendo un struct Point con dos enteros y una clase PointsIngenua con tres métodos públicos `add`, `remove` y `find`, manteniendo en privado un `std::vector<Point>` llamado pointsAvailable que guarda los puntos activos. La decisión de usar una clase con encapsulamiento responde al concepto de contrato, ya que en los siguientes días se piensa reemplazar la representación interna por un segment tree de Treaps y la idea es que main.cpp no necesite cambiar.
+
+- Implementé el método `add` que agrega un punto al final del vector con push_back. 
+
+```cpp
+void PointsIngenua::add(int x, int y) {
+    // Point con las coordenadas recibidas
+    // agregarlo al final del vector pointsAvailable
+}
+```
+
+- Implementé el método `remove` que recorre el vector con un iterador, compara campo a campo contra el punto a borrar, y al encontrarlo lo elimina con erase seguido de un return para evitar invalidación del iterador. 
+
+```cpp
+void PointsIngenua::remove(int x, int y) {
+    // recorrer el vector con un iterador desde begin hasta end
+        // si el punto actual coincide en ambas coordenadas con (x, y):
+            // borrar ese elemento del vector con erase
+            // salir de la funcion inmediatamente con return para no invalidar el iterador
+    // (si no se encuentra coincidencia, no hacer nada y terminar)
+}
+```
+
+- Implementé el método `find` `que recorre todo el vector aplicando dos filtros sucesivos, un primer filtro que descarta los puntos que no están estrictamente arriba y a la derecha de la consulta, y un segundo filtro de comparación contra el mejor candidato actual usando el criterio del problema, menor x con desempate por menor y. Como centinela para el caso sin respuesta uso el valor {-1, -1}, aprovechando que las coordenadas reales del problema son siempre positivas.
+
+```cpp
+Point PointsIngenua::find(int x, int y) {
+    // valor inicial del "mejor candidato" = centinela {-1, -1}
+    // recorrer todos los puntos del vector con un for-iterador
+        // si el punto actual es candidato (estrictamente arriba-derecha):
+            // si el mejor actual es el centinela O si este punto es mejor que el mejor actual:
+                // actualizar el mejor actual con este punto
+    // devolver el mejor (que sera el centinela si nunca encontramos candidato)
+}
+```
+
+Finalmente, la complejidad de esta versión es O(n) por operación `remove` y `find`, dando O(n²) total en el peor caso, lo cual confirma que no es viable para n=2·10⁵ pero sirve comparar con la solución principal, además de verificar correctitud para los tests aleatorios que validarán la versión eficiente.
