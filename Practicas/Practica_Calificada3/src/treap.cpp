@@ -65,3 +65,21 @@ void Treap::erase(int key) {
 
     root = merge(left, right);
 }
+
+int Treap::successor(int key) {
+    TreapNode* left = nullptr;
+    TreapNode* right = nullptr;
+    split(root, key, left, right);
+
+    int resultado = -1;
+    if (right != nullptr) {
+        TreapNode* actual = right;
+        while (actual->left != nullptr) {
+            actual = actual->left;
+        }
+        resultado = actual->key;
+    }
+
+    root = merge(left, right);
+    return resultado;
+}
