@@ -41,3 +41,27 @@ Treap::Treap() : root(nullptr) {}
 Treap::~Treap() {
     destroy(root);
 }
+
+void Treap::insert(int key) {
+    TreapNode* left = nullptr;
+    TreapNode* right = nullptr;
+    split(root, key, left, right);
+
+    TreapNode* nuevoNodo = new TreapNode(key);
+
+    root = merge(merge(left, nuevoNodo), right);
+}
+
+void Treap::erase(int key) {
+    TreapNode* left = nullptr;
+    TreapNode* restante = nullptr;
+    TreapNode* aBorrar = nullptr;
+    TreapNode* right = nullptr;
+
+    split(root, key - 1, left, restante);
+    split(restante, key, aBorrar, right);
+
+    delete aBorrar;
+
+    root = merge(left, right);
+}
