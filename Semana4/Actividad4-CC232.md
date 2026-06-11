@@ -90,3 +90,50 @@ Si la estructura guarda datos incorrectos (orden equivocado, tipo incorrecto, in
 
 En la resolución hay un estado final que es correcto o incorrecto; en la simulación hay una trayectoria de estados cuya validez depende de que el modelo sea fiel al sistema real, no de un valor esperado único. La aleatoriedad y el tiempo discreto son parte del modelo, no del problema a resolver.
 
+## Bloque 2 - Demostración y trazado guiado
+
+| Archivo | Salida u observable importante | Estructura o técnica central | Qué concepto permite defender |
+|---|---|---|---|
+| `demo_stack_queue.cpp` | Tope=9, Pop=9 / Frente=10, Dequeue=10 | `Stack<int>` y `Queue<int>` | LIFO - FIFO |
+| `demo_base_conversion.cpp` | Recursivo: "30071" / Iterativo: "30071" | `Stack<char>` con residuos apilados | Recursiva e iterativa producen la misma representación |
+| `demo_paren_rpn.cpp` | Balanceados=true / RPN completa / Valor=2012 | `Stack<double>` + `Stack<char>` para evaluar | Paréntesis -> RPN sin ambigüedad -> valor correcto |
+| `demo_nqueens.cpp` | N=4, soluciones=2, verificaciones=X | `Stack<Queen>`, backtracking con pila explícita | Respuestas ≠ checks (trabajo realizado) |
+| `demo_maze.cpp` | Medida del camino + secuencia de coordenadas | `Stack<Cell*>`, backtracking con marcado de estado | La pila reconstruye el camino |
+| `demo_bank.cpp` | Llegadas=N, atendidos=M, estado de colas en cada t | `vector<Queue<Customer>>`, política FIFO | La cola modela espera justa y permite ver la congestión temporal |
+| `demo_capitulo4_panorama.cpp` | "Semana 4 cargada correctamente" y todos los resultados en pantalla | Integración de Stack, Queue y todas las aplicaciones | Una sola semana une estructuras lineales y algoritmos avanzados |
+
+### 1. En `demo_stack_queue.cpp`, ¿qué parte de la salida deja más clara la diferencia entre tope y frente?
+
+La parte más ilustrativa es la comparación directa:
+
+```bash
+Tope de la pila = 9       <- el último en insertarse (LIFO)
+Frente de la cola = 10    <- el primero en insertarse (FIFO)
+```
+
+### 2. En `demo_base_conversion.cpp`, ¿qué observable permite afirmar que las versiones recursiva e iterativa producen la misma representación?
+
+Ambas líneas imprimen exactamente `"30071"`. Tanto en recursivo como en iterativo.
+
+Esto evidencia que aunque el control del proceso difiere, el resultado de apilar los residuos en el mismo orden y luego extraerlos con `popAll` es idéntico. La pila normaliza el orden de los dígitos de la misma manera en ambas versiones.
+
+### 3. En `demo_paren_rpn.cpp`, ¿qué relación observas entre paréntesis balanceados, RPN y valor final?
+
+La expresión `(0!+1)*2^(3!+4)-(5!-67-(8+9))` tiene paréntesis balanceados (resultado `true`). Eso es condición necesaria para que el algoritmo de evaluación pueda procesar correctamente la prioridad de operadores. Como los paréntesis están bien formados, el evaluador genera una RPN sin ambigüedad y aplica las operaciones en el orden correcto, obteniendo el valor exacto 2012. Si los paréntesis estuvieran mal formados, el evaluador lanzaría un error antes de producir RPN o valor.
+
+### 4. En `demo_nqueens.cpp`, ¿qué significan `solutions` y `checks`, y por qué no miden lo mismo?
+
+No miden lo mismo porque `checks` contabiliza todas las comparaciones hechas en caminos que no llevan a solución, además de los que sí llevan. Para n=4, el algoritmo puede verificar decenas de conflictos para encontrar solo 2 soluciones. `checks` crece mucho más rápido que `solutions` conforme n aumenta.
+
+### 5. En `demo_maze.cpp`, ¿qué muestra la secuencia de coordenadas sobre el camino encontrado?
+
+Demuestra que el backtracking funcionó. El algoritmo exploró y descartó caminos erróneos, y la pila al final contiene únicamente el camino exitoso como una secuencia ordenada de coordenadas.
+
+### 6. En `demo_bank.cpp`, ¿qué representa cada lista impresa en cada instante `t`?
+
+En cada instante `t`, se imprimen las colas de las 3 ventanillas. Cada lista muestra el tiempo restante de atención de cada cliente en esa ventanilla, en orden FIFO. El primer valor es el cliente siendo atendido ahora, y los siguientes son los que esperan. Por ejemplo, `[15, 42]` significa que el cliente al frente tiene 15 unidades restantes y el siguiente tiene 42. Permite ver en tiempo real cómo se llenan, se vacían y se redistribuyen los clientes entre ventanillas.
+
+### 7. En `demo_capitulo4_panorama.cpp`, ¿qué salida resume mejor la idea de que una misma semana reúne estructuras y aplicaciones?
+
+La línea `"Semana 4 cargada correctamente"` seguida de todos los resultados impresos en secuencia en un único programa es el mejor resumen. Demuestra que `Stack` y `Queue` no son estructuras aisladas sino la base común de aplicaciones tan diferentes como evaluar expresiones aritméticas, soluciones con backtracking y simular sistemas de servicio.
+
