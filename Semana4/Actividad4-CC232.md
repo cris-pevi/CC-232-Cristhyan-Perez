@@ -137,3 +137,103 @@ En cada instante `t`, se imprimen las colas de las 3 ventanillas. Cada lista mue
 
 La línea `"Semana 4 cargada correctamente"` seguida de todos los resultados impresos en secuencia en un único programa es el mejor resumen. Demuestra que `Stack` y `Queue` no son estructuras aisladas sino la base común de aplicaciones tan diferentes como evaluar expresiones aritméticas, soluciones con backtracking y simular sistemas de servicio.
 
+## Bloque 3 - Pruebas públicas, pruebas internas y correctitud
+
+### 1. ¿Qué operaciones mínimas valida la prueba pública para `Stack`?
+
+La prueba pública `test_public_week4.cpp` valida cuatro operaciones (empty, push, top, pop) que cubren el ciclo completo de vida de la pila
+
+- `empty()` retorna true cuando la pila está recién creada.
+- `push(5)` y `push(9)` agregan elementos; `top()` retorna el último insertado.
+- `pop()` retorna el elemento del tope en orden LIFO.
+- `empty()` retorna `true` después de extraer todos los elementos.
+
+### 2. ¿Qué operaciones mínimas valida la prueba pública para `Queue`?
+
+- `empty()` retorna true inicialmente.
+- `enqueue(1)`, `enqueue(2)`, `enqueue(3)` agregan elementos.
+- `front()` retorna el primer insertado sin sacarlo.
+- `dequeue()` extrae en orden FIFO.
+- `empty()` retorna true al final.
+
+### 3. ¿Qué valida la prueba pública sobre conversión de base?
+
+La prueba pública valida que ambas implementaciones son equivalentes para este caso concreto y que la representación octal de 12345 es "30071".
+
+### 4. ¿Qué valida la prueba pública sobre paréntesis balanceados?
+
+La prueba pública valida tres casos:
+- `parenRecursive("a+(b*(c+d))")` -> `true`: paréntesis correctamente anidados.
+- `parenIterative("a+(b*[c-{d/e}])")` -> `true`: múltiples tipos de delimitadores correctamente anidados.
+- `parenIterative("([)]")` -> `false`: cruce incorrecto entre tipos de delimitadores.
+
+### 5. ¿Qué valida la prueba pública sobre evaluación de expresiones y RPN?
+
+La prueba pública valida para la expresión `(0!+1)*2^(3!+4)-(5!-67-(8+9))`:
+- La RPN generada sea exactamente `"0 ! 1 + 2 3 ! 4 + ^ * 5 ! 67 - 8 9 + - -"`
+- El valor calculado es `2012.0`
+
+Entonces, valida tanto la correctitud de la conversión a notación postfija (RPN) como la correctitud del cálculo aritmético.
+
+### 6. ¿Qué valida la prueba pública sobre `NQueens`?
+
+La prueba pública valida para n=4:
+- `queens.solutions == 2`: el tablero 4×4 tiene exactamente 2 soluciones al problema de las 4 reinas.
+- `queens.placements.size() == 2`: se almacenaron ambas configuraciones cuando `collectPlacements = true`.
+
+### 7. ¿Qué valida la prueba pública sobre `Maze`?
+
+La prueba pública valida:
+- `!path.empty()`: existe un camino, es decir, el laberinto tiene solución.
+- `path.front() == {1, 1}`: el primer elemento del camino es la celda de inicio.
+- `path.back() == {3, 3}`: el último elemento es la celda destino.
+
+### 8. ¿Qué valida la prueba pública sobre `bestWindow` en la simulación bancaria?
+
+La prueba pública configura:
+- `windows[0]`: 2 clientes
+- `windows[1]`: 1 cliente
+- `windows[2]`: vacía
+
+Y verifica que `bestWindow(windows) == 2`, es decir, retorna el índice de la cola más corta, la vacía. Esto valida la política de "menor cola" y el comportamiento cuando hay una ventanilla sin clientes.
+
+### 9. ¿Qué casos adicionales cubre la prueba interna y no aparecen de forma explícita en la pública?
+
+ La prueba interna `test_internal_week4.cpp` agrega:
+
+**Conversión de base:**
+- `toBaseRecursive(0, 2) == "0"`: caso borde del número cero, que debe retornar "0" sin entrar al bucle ni a la recursión.
+- `toBaseIterative(255, 16) == "FF"`: conversión hexadecimal con dígitos alfabéticos.
+
+**Paréntesis:**
+- `parenRecursive("sin parentesis")` -> `true`: cadena sin ningún delimitador debe considerarse balanceada.
+- `parenIterative("{[(])}")` -> `false`: cruce con tres tipos de delimitadores.
+
+**Evaluador:**
+- `"3+4*2"`: prioridad de operadores sin paréntesis; RPN `"3 4 2 * +"`, valor 11.
+- `"5!+2^3"`: combinación de factorial y potencia; RPN `"5 ! 2 3 ^ +"`, valor 128.
+- `"-3+5"`: signo menos unario; valor 2.
+
+**N-Reinas:**
+- `placeQueens(1)`: caso mínimo con exactamente una solución; la reina única está en la columna 0.
+
+### 10. ¿Por qué pasar pruebas no reemplaza una explicación de invariantes, estado y complejidad?
+
+Las pruebas solo verifican que el código produce el resultado correcto para un conjunto finito y específico de casos. No demuestran Corrección general, que se entiende como el algoritmo funcione para todos los inputs posibles, no solo los probados. 
+
+Un algoritmo puede pasar todas las pruebas escritas y aun así ser incorrecto para inputs no probados. La explicación de invariantes es la forma de demostrar corrección sin enumeración exhaustiva.
+
+### 11. Da un ejemplo de un error conceptual que podría sobrevivir si solo se ejecutaran los casos mínimos.
+
+
+Supongamos que `parenIterative` ignora el **tipo** de delimitador al cerrar y solo verifica que la pila no esté vacía:
+
+```cpp
+case ')': case ']': case '}':
+    if (stack.empty()) return false;
+    stack.pop();
+    break;
+```
+
+Esta implementación errónea pasaría todos los casos mínimos que solo usan paréntesis redondos, como `"a+(b*(c+d))"`. Pero fallaría para `"([)]"` (cruce de tipos). Si la prueba pública no incluyera el caso `"([)]"`, ese error conceptual nunca se detectaría, y el código parecería correcto.
+
