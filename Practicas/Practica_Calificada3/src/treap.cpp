@@ -20,6 +20,22 @@ static TreapNode* merge(TreapNode* a, TreapNode* b) {
     }
 }
 
+static void split(TreapNode* node, int key, TreapNode*& left, TreapNode*& right) {
+    if (node == nullptr) {
+        left = nullptr;
+        right = nullptr;
+        return;
+    }
+
+    if (node->key <= key) {
+        split(node->right, key, node->right, right);
+        left = node;
+    } else {
+        split(node->left, key, left, node->left);
+        right = node;
+    }
+}
+
 Treap::Treap() : root(nullptr) {}
 
 Treap::~Treap() {
