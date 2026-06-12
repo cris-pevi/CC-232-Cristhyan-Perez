@@ -237,3 +237,108 @@ case ')': case ']': case '}':
 
 Esta implementación errónea pasaría todos los casos mínimos que solo usan paréntesis redondos, como `"a+(b*(c+d))"`. Pero fallaría para `"([)]"` (cruce de tipos). Si la prueba pública no incluyera el caso `"([)]"`, ese error conceptual nunca se detectaría, y el código parecería correcto.
 
+## Bloque 4 - Comparación recursivo vs iterativo
+
+### 1. En conversión de base, ¿qué papel juegan el cociente, el residuo y la pila?
+
+En cada paso, dividir n entre base produce dos piezas de información complementarias. Por un lado el residuo `n % base` es el dígito menos significativo todavía no emitido, y el cociente `n / base` representa "lo que queda por convertir". La pila guarda los residuos a medida que se generan, de modo que al final basta con vaciarla para que los dígitos salgan en el orden correcto. Basicamente, el cociente y residuo dirigen el avance del algoritmo; la pila resuelve el problema de orden inverso entre cómo se generan los dígitos y cómo se leen.
+
+### 2. ¿Por qué los residuos se apilan antes de formar la cadena final?
+
+Los residuos se producen del dígito menos significativo al más significativo, pero la lectura humana del número va al revés. Si se concatenara la cadena directamente, quedaría escrita en el orden incorrecto. La pila aprovecha el LIFO dado que el último residuo apilado es el primero en salir cuando `popAll` vacía la pila, restituyendo el orden de lectura sin necesidad de invertir cadenas después.
+
+### 3. ¿Qué cambia entre dejar que el call stack haga el trabajo y manejar una pila explícita?
+
+Lo que cambia es quién controla la memoria de estado intermedio: en el recursivo, la pila del lenguaje, con su costo de frames; en el iterativo, una estructura de datos que el programador puede inspeccionar, limitar y razonar sobre ella. La equivalencia conceptual entre ambas se vuelve concreta cuando se ve que el iterativo simula exactamente lo que el recursivo deja implícito.
+
+### 4. En `parenRecursive`, ¿qué idea intenta capturar `divideParentheses`?
+
+`divideParentheses` intenta capturar dónde termina el bloque de paréntesis externo que arranca en `lo`. Avanza un contador `crc` que sube con `(` y baja con `)`, deteniéndose cuando el contador vuelve a cero. Digamos que conceptualmente busca el `)` que cierra al `(` inicial, partiendo la expresión en "lo que está dentro del primer paréntesis externo" y "lo que viene después de cerrarlo", para verificar recursivamente cada parte por separado.
+
+### 5. ¿Qué limitación conceptual tiene la versión recursiva mostrada frente a la iterativa cuando aparecen `[]` y `{}`?
+
+La versión recursiva solo razona sobre `(` y `)`; la iterativa, en cambio, lleva en la pila el tipo de apertura pendiente y detecta el cruce en cuanto el cierre no coincide con el tope.
+
+### 6. En `parenIterative`, ¿por qué un cierre incorrecto puede detectarse apenas aparece?
+
+La pila mantiene en todo momento las aperturas pendientes en el orden en que se abrieron. El último símbolo abierto es el único cierre válido inmediato. Cuando llega un `)`, `]` o `}`, basta comparar con el tope y si no coincide, o si la pila está vacía, hay incompatibilidad, y se puede abortar sin seguir leyendo. No hace falta esperar al final de la cadena para emitir una conclusión, porque la invariante "el tope es siempre el delimitador que debería cerrarse a continuación" se rompe en el instante exacto del error.
+
+### 7. Compara ambas parejas de funciones: ¿en cuál caso la versión iterativa te parece más natural y en cuál la recursiva resulta más expresiva?
+
+En conversión de base la versión iterativa resulta más natural. El problema ya es esencialmente un bucle "mientras `n > 0`, apila residuo y divide, y la pila explícita modela limpiamente la única necesidad estructural (invertir el orden de los dígitos). La recursión añade frames de llamada sin aportar claridad. En paréntesis ocurre lo contrario solo en apariencia porque la recursión es más expresiva como definición matemática, y por eso `parenRecursive` se lee bien como una traducción directa de la gramática; pero esa elegancia se paga con la limitación a un único delimitador y con un costo de tiempo no lineal por las llamadas anidadas que reexaminan la cadena. 
+
+#### Experimento 1 - Conversión de base
+
+Acá se nos pide ejecutar pruebas propias con al menos cinco números y cuatro bases distintas para `toBaseRecursive` y `toBaseIterative`.
+
+Los cinco números a usar son: `0, 7, 12345, 255, 1048576` y cuatro bases (`2, 8, 10, 16`), comparando `toBaseRecursive` y `toBaseIterative`:
+
+| Número  | Base | Recursivo               | Iterativo               | Coinciden | Comentario |
+|---------|------|-------------------------|-------------------------|-----------|------------|
+| 0       | 2    | `0`                     | `0`                     | sí        | Caso límite. |
+| 0       | 8    | `0`                     | `0`                     | sí        | Mismo caso límite. |
+| 0       | 10   | `0`                     | `0`                     | sí        | Mismo caso límite. |
+| 0       | 16   | `0`                     | `0`                     | sí        | Mismo caso límite. |
+| 7       | 2    | `111`                   | `111`                   | sí        | Prueba que el orden tras `popAll` es el correcto. |
+| 7       | 8    | `7`                     | `7`                     | sí        | Un solo dígito; la pila tiene un único elemento. |
+| 7       | 10   | `7`                     | `7`                     | sí        | Identidad cuando base = 10. |
+| 7       | 16   | `7`                     | `7`                     | sí        | Aún en rango de dígitos numéricos. |
+| 12345   | 2    | `11000000111001`        | `11000000111001`        | sí        | 14 dígitos, prueba de escala mediana. |
+| 12345   | 8    | `30071`                 | `30071`                 | sí        | Cinco residuos, orden de pila bien restituido. |
+| 12345   | 10   | `12345`                 | `12345`                 | sí        | Identidad. |
+| 12345   | 16   | `3039`                  | `3039`                  | sí        | Sin letras `A-F`, pero la tabla `digit[]` está activa. |
+| 255     | 2    | `11111111`              | `11111111`              | sí        | Caso clásico de byte saturado. |
+| 255     | 8    | `377`                   | `377`                   | sí        |  |
+| 255     | 10   | `255`                   | `255`                   | sí        |  |
+| 255     | 16   | `FF`                    | `FF`                    | sí        | Ejercita la zona alfabética de `digit[]`. |
+| 1048576 | 2    | `100000000000000000000` | `100000000000000000000` | sí        | Prueba con muchas divisiones consecutivas. |
+| 1048576 | 8    | `4000000`               | `4000000`               | sí        |  |
+| 1048576 | 10   | `1048576`               | `1048576`               | sí        |  |
+| 1048576 | 16   | `100000`                | `100000`                | sí        | $2^{20}$ en hex. |
+
+En los 20 casos las salidas coinciden carácter por carácter, lo que es evidencia de que ambas implementaciones son equivalentes en este dominio (`n >= 0`, `2 <= base <= 16`). Esto no demuestra equivalencia formal, pero sí descarta los errores típicos (orden invertido, residuos perdidos en el caso `n == 0`, manejo del dígito hex). La diferencia entre las dos versiones no está en el resultado sino en quién administra la pila, o bien la del lenguaje (recursivo) o bien una estructura explícita controlada por el programador (iterativo).
+
+### Experimento 2
+
+Ocho expresiones comparando `parenRecursive` y `parenIterative`:
+
+| Caso                                | Expresión                              | Recursivo | Iterativo | Coinciden | Qué explica |
+|-------------------------------------|----------------------------------------|-----------|-----------|-----------|-------------|
+| Vacía                               | `""`                                   | true      | true      | sí        | La cadena vacía está balanceada por convención. En la recursiva entra al `if (expr.empty())`, en la iterativa la pila nunca se toca y sale vacía. |
+| Sin paréntesis                      | `"a+b*c-d"`                            | true      | true      | sí        | Ningún delimitador presente. En la recursiva, `trimParentheses` deja `lo > hi`; mientras que en la iterativa, la pila nunca recibe nada. |
+| Anidada correcta                    | `"((a+b)*(c-d))"`                      | true      | true      | sí        | La recursiva parte en `mi` y verifica cada mitad; la iterativa apila tres `(` y los cierra en orden inverso. |
+| Desbalance                          | `"((a+b)"`                             | false     | false     | sí        | En la recursiva, `divideParentheses` recorre hasta `hi` sin cerrar y retorna `mi > hi`; en la iterativa, queda una `(` en la pila al terminar. Ambas detectan el desbalance pero por mecanismos distintos. |
+| Cruce incorrecto                    | `"([a+b)]"`                            | true      | **false** | no    | La recursiva solo distingue `(` y `)`: ignora `[` y `]`, "ve" solo `(a+b)` y dice balanceado. La iterativa apila `(` y `[`; al llegar `)` el tope es `[` y declara falso de inmediato. Podemos ver el límite real de la versión recursiva mostrada. |
+| Varios delimitadores                | `"{[a+(b*c)]-d}"`                      | true      | true      | sí        | El recursivo acierta por accidente: ignora `{`, `}`, `[`, `]` y solo verifica que `(b*c)` esté balanceado. El iterativo acierta por la razón correcta. |
+| Larga balanceada                    | `"((((a+b))+((c+d)*(e-f))))+((g+h))"`  | true      | true      | sí        | Estrés con varios niveles de anidamiento; la pila iterativa llega a profundidad 4 y se vacía sin incidentes. |
+| Inventada (anidada con corchetes)   | `"[(a+b)*[c-(d+e)]]"`                  | true      | true      | sí        | Ambas dan true, pero por motivos distintos: el recursivo solo verifica los `(`/`)` interiores, el iterativo verifica que los corchetes externos también finalicen. Coincidencia accidental. |
+
+Las dos versiones coinciden en 7 de 8 casos. El caso `"([a+b)]"` muestra que en el recursivo da un veredicto erróneo (`true`) porque no tiene un mecanismo para registrar el tipo de apertura pendiente. Donde ambas dan `true` con corchetes o llaves balanceados, la igualdad es coincidencia. El recursivo está ignorando esos delimitadores, no validándolos. 
+
+La pila explícita no solo es una alternativa estilística a la recursión; en este problema concreto es la que permite generalizar a múltiples tipos de delimitador y detectar errores en el momento exacto en que ocurren.
+
+## Bloque 5 - Evaluación de expresiones y prioridad de operadores
+
+### 1. Explica qué información guarda `EvaluationResult`.
+
+
+
+### 2. Explica por qué primero se eliminan espacios.
+
+
+### 3. Explica cómo se detecta el signo menos unario.
+
+
+### 4. Explica por qué el factorial se trata como operador  unario y qué restricción impone el código.
+
+
+### 5. Explica cómo la RPN se va construyendo durante la evaluación y no al final.
+
+
+### 6. Explica qué significa la relación entre operador del tope y símbolo actual.
+
+
+### 7. Explica por qué una expresión mal formada debe terminar en error y no en un valor arbitrario.
+
+
+### 8. ¿Qué ventaja conceptual tiene obtener a la vez el valor y la RPN?
