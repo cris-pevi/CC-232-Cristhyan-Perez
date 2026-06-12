@@ -18,9 +18,9 @@ add_executable(executable_programa
 	src/solution.cpp
 )
 
-add_executable(executable_test
-	tests/test.cpp
-	src/solution.cpp
+add_executable(executable_test_treap
+	demos/test_treap.cpp
+	src/treap.cpp
 )
 
 add_executable(executable_benchmark
@@ -31,4 +31,4 @@ add_executable(executable_benchmark
 #Activacion de CTest
 enable_testing()
 
-add_test(NAME pruebas COMMAND executable_test)
+add_test(NAME pruebas COMMAND executable_test_treap)
