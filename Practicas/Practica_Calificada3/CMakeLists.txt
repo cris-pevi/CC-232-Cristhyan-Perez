@@ -23,6 +23,12 @@ add_executable(executable_test_treap
 	src/treap.cpp
 )
 
+add_executable(executable_test_segtree
+    demos/test_segment_treap.cpp
+    src/segment_treap.cpp
+    src/treap.cpp
+)
+
 add_executable(executable_benchmark
 	benchmark/benchmark.cpp
 	src/solution.cpp
