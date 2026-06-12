@@ -31,6 +31,13 @@ add_executable(executable_test_segtree
     src/treap.cpp
 )
 
+add_executable(executable_test_solucion
+    tests/test_solucion.cpp
+    src/solution.cpp
+    src/segment_treap.cpp
+    src/treap.cpp
+)
+
 add_executable(executable_benchmark
 	benchmark/benchmark.cpp
 	src/solution.cpp
@@ -40,3 +47,4 @@ add_executable(executable_benchmark
 enable_testing()
 
 add_test(NAME pruebas COMMAND executable_test_treap)
+add_test(NAME prueba_solucion COMMAND executable_test_solucion)
