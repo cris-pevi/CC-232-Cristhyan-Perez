@@ -14,8 +14,10 @@ endif()
 include_directories(include)
 
 add_executable(executable_programa
-	src/main.cpp
-	src/solution.cpp
+    src/main.cpp
+    src/solution.cpp
+    src/segment_treap.cpp
+    src/treap.cpp
 )
 
 add_executable(executable_test_treap
