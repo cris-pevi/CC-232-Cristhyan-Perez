@@ -17,6 +17,15 @@ int main() {
         std::cout << "Caso 3 OK: SegmentTreap con n=200000 construido y destruido" << std::endl;
     }
 
+    {
+        SegmentTreap st(8);
+        st.insertar(0, 100);
+        st.insertar(3, 50);
+        st.insertar(7, 200);
+        st.insertar(3, 75);
+        std::cout << "Caso 4 OK: Insertar varios puntos sin crash" << std::endl;
+    }
+
     std::cout << "\n... La construcción y destrucción OK ..." << std::endl;
     return 0;
 }

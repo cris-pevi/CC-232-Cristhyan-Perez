@@ -23,3 +23,22 @@ SegmentTreap::~SegmentTreap() {
         }
     }
 }
+
+void SegmentTreap::insertar(int idx, int y) {
+    insertarRec(1, 0, tamano - 1, idx, y);
+}
+
+void SegmentTreap::insertarRec(int nodo, int inicio, int fin, int idx, int y) {
+    nodos[nodo]->insert(y);
+
+    if (inicio == fin) {
+        return;
+    }
+
+    int medio = (inicio + fin) / 2;
+    if (idx <= medio) {
+        insertarRec(2 * nodo, inicio, medio, idx, y);
+    } else {
+        insertarRec(2 * nodo + 1, medio + 1, fin, idx, y);
+    }
+}
