@@ -26,6 +26,18 @@ int main() {
         std::cout << "Caso 4 OK: Insertar varios puntos sin crash" << std::endl;
     }
 
+    {
+        SegmentTreap st(8);
+        st.insertar(0, 100);
+        st.insertar(3, 50);
+        st.insertar(7, 200);
+        st.borrar(0, 100);
+        st.borrar(3, 50);
+        st.insertar(5, 25);
+        st.borrar(5, 25);
+        std::cout << "Caso 5 OK: Insertar y borrar varios puntos sin crashear" << std::endl;
+    }
+
     std::cout << "\n... La construcción y destrucción OK ..." << std::endl;
     return 0;
 }

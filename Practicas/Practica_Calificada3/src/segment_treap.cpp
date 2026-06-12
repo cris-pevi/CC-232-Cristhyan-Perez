@@ -42,3 +42,22 @@ void SegmentTreap::insertarRec(int nodo, int inicio, int fin, int idx, int y) {
         insertarRec(2 * nodo + 1, medio + 1, fin, idx, y);
     }
 }
+
+void SegmentTreap::borrar(int idx, int y) {
+    borrarRec(1, 0, tamano - 1, idx, y);
+}
+
+void SegmentTreap::borrarRec(int nodo, int inicio, int fin, int idx, int y) {
+    nodos[nodo]->erase(y);
+
+    if (inicio == fin) {
+        return;
+    }
+
+    int medio = (inicio + fin) / 2;
+    if (idx <= medio) {
+        borrarRec(2 * nodo, inicio, medio, idx, y);
+    } else {
+        borrarRec(2 * nodo + 1, medio + 1, fin, idx, y);
+    }
+}
